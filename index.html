@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111322">
+<meta name="description" content="Brawl Stars Hub｜荒野亂鬥官方消息、版本更新與角色資料整理。">
+<title>Brawl Stars Hub｜荒野亂鬥情報站</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{color-scheme:dark;--bg:#0d1020;--panel:#171b30;--panel2:#202641;--line:#303956;--text:#f4f6ff;--muted:#aab3ce;--yellow:#ffd65a;--pink:#ff6e9c;--blue:#78c8ff;--green:#7ce3b0;--radius:20px;font-family:Inter,system-ui,-apple-system,"Noto Sans TC",sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 15% -10%,#28335d 0,transparent 38%),radial-gradient(ellipse at 100% 10%,#382447 0,transparent 32%),var(--bg);color:var(--text);min-height:100vh}
+button,input,textarea,select{font:inherit}button{cursor:pointer}.wrap{width:min(1120px,calc(100% - 32px));margin:auto}
+header{position:sticky;top:0;z-index:10;background:#0d1020dd;backdrop-filter:blur(18px);border-bottom:1px solid #ffffff12}
+.top{height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.2px}.brandmark{width:42px;height:42px;border-radius:14px;background:linear-gradient(145deg,#ffe56c,#ff9e49);display:grid;place-items:center;color:#302344;font-size:24px;box-shadow:0 8px 24px #ffbd4b33}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2px;margin-top:2px}
+.btn{border:0;border-radius:13px;padding:11px 16px;font-weight:800;color:#171a2b;background:var(--yellow);transition:.18s}.btn:hover{transform:translateY(-1px);filter:brightness(1.06)}.btn.secondary{background:#2b3454;color:var(--text);border:1px solid #465174}.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}.btn.danger{background:#51283a;color:#ffd8e3}.btn.small{padding:8px 11px;font-size:12px;border-radius:10px}
+.hero{padding:52px 0 28px}.hero-card{position:relative;overflow:hidden;padding:clamp(24px,5vw,52px);border-radius:28px;background:linear-gradient(115deg,#252c4d 0%,#302347 60%,#4b2b4a 100%);border:1px solid #ffffff20;box-shadow:0 22px 70px #0005}.hero-card:before,.hero-card:after{content:"";position:absolute;border-radius:50%;pointer-events:none}.hero-card:before{width:260px;height:260px;right:-60px;top:-100px;background:#ffcf5b22}.hero-card:after{width:180px;height:180px;right:110px;bottom:-130px;border:32px solid #83d7ff18}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--yellow);font-size:12px;font-weight:900;letter-spacing:1.8px}.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+h1{font-size:clamp(34px,7vw,62px);line-height:1.08;margin:17px 0 13px;letter-spacing:-1.5px}.hero p{max-width:590px;color:#d0d5e9;line-height:1.8;margin:0}.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;position:relative;z-index:1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.stat{background:#151a2ccc;border:1px solid #ffffff12;border-radius:16px;padding:15px 17px}.stat strong{font-size:24px;display:block}.stat span{font-size:12px;color:var(--muted)}
+main{padding:10px 0 60px}.nav{display:flex;gap:8px;overflow:auto;padding:8px 0 18px;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}.nav button{white-space:nowrap;border:1px solid var(--line);background:#171b30;color:var(--muted);padding:10px 16px;border-radius:999px;font-weight:800}.nav button.active{background:var(--yellow);color:#252039;border-color:var(--yellow)}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:18px 0 16px}.section-head h2{font-size:23px;margin:0}.section-head p{color:var(--muted);font-size:13px;margin:5px 0 0}.search{width:min(280px,48%);border:1px solid var(--line);background:#171b30;color:var(--text);padding:11px 14px;border-radius:13px;outline:none}.search:focus,input:focus,textarea:focus,select:focus{border-color:#8a9bda;box-shadow:0 0 0 3px #8a9bda22}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{background:linear-gradient(155deg,#1b2038,#15192c);border:1px solid #ffffff13;border-radius:18px;overflow:hidden;min-width:0;transition:.2s}.card:hover{transform:translateY(-3px);border-color:#6675a5}.card-body{padding:17px}.cover{height:145px;background:linear-gradient(135deg,#35466d,#48304f);display:grid;place-items:center;font-size:42px;color:#ffffff88;overflow:hidden}.cover img{width:100%;height:100%;object-fit:cover}.tag{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;background:#303858;color:#b9d9ff;font-size:11px;font-weight:800}.tag.yellow{background:#4a4128;color:#ffe18a}.tag.pink{background:#492b40;color:#ffafd0}.card h3{font-size:17px;line-height:1.45;margin:11px 0 7px}.card p{font-size:13px;line-height:1.7;color:var(--muted);margin:0}.meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px;color:#8490b2;font-size:11px}.empty{padding:42px 18px;border:1px dashed #465174;border-radius:18px;text-align:center;color:var(--muted);grid-column:1/-1}.empty b{display:block;color:var(--text);font-size:16px;margin-bottom:6px}
+.feature{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-bottom:16px}.feature .card{min-height:220px}.feature .cover{height:100%;min-height:220px}.feature .card-body{padding:24px}.feature h3{font-size:22px}
+.view{display:none}.view.active{display:block}.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.filters button{border:1px solid var(--line);background:#171b30;color:var(--muted);padding:8px 12px;border-radius:999px;font-size:12px}.filters button.active{background:#303858;color:white;border-color:#64739e}
+.brawler .cover{height:160px;background:radial-gradient(circle at 50% 20%,#6b5b9b,#252b4c 70%)}.brawler .cover img{object-fit:contain;padding:10px}.brawler h3{margin-top:5px}
+.admin-shell{background:#151a2d;border:1px solid var(--line);border-radius:20px;padding:clamp(16px,3vw,26px)}.admin-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.admin-head h2{margin:0}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:12px;color:var(--muted);font-weight:800}.field input,.field textarea,.field select{width:100%;background:#0e1324;border:1px solid var(--line);border-radius:11px;padding:11px 12px;color:var(--text);outline:none}.field textarea{min-height:110px;resize:vertical}.checkrow{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px}.admin-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}.admin-tabs button{background:#222944;border:1px solid var(--line);color:var(--muted);padding:9px 13px;border-radius:10px}.admin-tabs button.active{background:var(--yellow);color:#252039;border-color:var(--yellow)}.admin-list{display:grid;gap:8px;margin-top:22px}.admin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;background:#202641;border-radius:12px}.admin-row small{color:var(--muted);display:block;margin-top:3px}.login{max-width:420px;margin:20px auto}.login h2{margin-top:0}.notice{padding:12px 14px;background:#25304d;border:1px solid #3c4b73;color:#cbd8ff;border-radius:12px;font-size:13px;line-height:1.7;margin:12px 0}.notice.warn{background:#3c2e26;border-color:#73523b;color:#ffe0bd}
+footer{border-top:1px solid #ffffff12;padding:24px 0 38px;color:#7985a5;font-size:12px;line-height:1.8}.foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#f4f6ff;color:#171a2b;padding:12px 18px;border-radius:12px;font-weight:800;font-size:13px;z-index:30;transition:.2s;box-shadow:0 10px 30px #0005}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:760px){.hero{padding-top:26px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature{grid-template-columns:1fr}.feature .cover{height:150px;min-height:150px}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:20px}.top{height:64px}.brandmark{width:38px;height:38px}.section-head{align-items:start;flex-direction:column}.search{width:100%}}
+@media(max-width:480px){.wrap{width:min(100% - 22px,1120px)}.grid{grid-template-columns:1fr}.hero-card{border-radius:21px}.stats{grid-template-columns:repeat(3,1fr)}.stat span{font-size:10px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.admin-row{align-items:flex-start;flex-direction:column}.admin-row .actions{display:flex;gap:7px}}
+</style>
+</head>
+<body>
+<header><div class="wrap top">
+  <div class="brand"><div class="brandmark">★</div><div>BRAWL STARS HUB<small>COMMUNITY INFORMATION CENTER</small></div></div>
+  <button class="btn secondary small" id="adminOpen">管理入口</button>
+</div></header>
+<div class="wrap">
+<section class="hero">
+  <div class="hero-card">
+    <div class="eyebrow"><span class="dot"></span> BRAWL STARS · TAIWAN</div>
+    <h1>荒野亂鬥情報站</h1>
+    <p>官方消息、版本更新與角色資料，一站整理。以繁體中文閱讀重要情報，讓每場對戰都掌握最新動態。</p>
+    <div class="hero-actions"><button class="btn" data-go="news">瀏覽最新消息　→</button><button class="btn secondary" data-go="brawlers">探索角色</button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><strong id="newsCount">—</strong><span>已發布消息</span></div>
+    <div class="stat"><strong id="updateCount">—</strong><span>版本紀錄</span></div>
+    <div class="stat"><strong id="brawlerCount">—</strong><span>角色資料</span></div>
+  </div>
+</section>
+<main>
+  <nav class="nav" aria-label="主要導覽">
+    <button class="active" data-view="home">首頁</button><button data-view="news">最新消息</button><button data-view="updates">版本更新</button><button data-view="brawlers">角色圖鑑</button>
+  </nav>
+  <section class="view active" id="view-home">
+    <div class="section-head"><div><h2>最新情報</h2><p>官方公告與人工整理的重點消息</p></div><button class="btn ghost small" data-go="news">查看全部 →</button></div>
+    <div id="homeFeatured" class="feature"></div>
+    <div id="homeNews" class="grid"></div>
+  </section>
+  <section class="view" id="view-news">
+    <div class="section-head"><div><h2>最新消息</h2><p>公告、活動、社群消息與維護資訊</p></div><input class="search" id="newsSearch" placeholder="搜尋消息標題…"></div>
+    <div class="filters" id="newsFilters"><button class="active" data-category="all">全部</button><button data-category="official">官方公告</button><button data-category="event">活動消息</button><button data-category="maintenance">維護資訊</button><button data-category="community">社群整理</button></div>
+    <div id="newsGrid" class="grid"></div>
+  </section>
+  <section class="view" id="view-updates">
+    <div class="section-head"><div><h2>版本更新</h2><p>更新內容、平衡調整與版本摘要</p></div><input class="search" id="updateSearch" placeholder="搜尋版本或標題…"></div>
+    <div id="updatesGrid" class="grid"></div>
+  </section>
+  <section class="view" id="view-brawlers">
+    <div class="section-head"><div><h2>角色圖鑑</h2><p>依照角色資料快速查找</p></div><input class="search" id="brawlerSearch" placeholder="搜尋角色名稱…"></div>
+    <div id="brawlersGrid" class="grid"></div>
+  </section>
+  <section class="view" id="view-admin">
+    <div id="adminRoot"></div>
+  </section>
+</main>
+</div>
+<footer><div class="wrap foot"><div>© Brawl Stars Hub · 非官方粉絲資訊整理網站</div><div>本網站與 Supercell 無隸屬或官方合作關係。遊戲名稱及相關素材權利歸其各自權利人所有。</div></div></footer>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+const SUPABASE_URL='https://iyduszeaqyhivmnzbhwb.supabase.co';
+const SUPABASE_KEY='sb_publishable_Nc18atcX3PB6x_vEos-4rw_UuR8hVVI';
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let news=[],updates=[],brawlers=[],activeCategory='all',adminUser=null,isAdmin=false,adminTab='news';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const date=s=>s?new Date(s).toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}):'尚未標示日期';
+function toast(s){const t=$('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)}
+function empty(msg){return '<div class="empty"><b>'+esc(msg)+'</b>目前還沒有可顯示的資料。</div>'}
+function go(view){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+view));window.scrollTo({top:0,behavior:'smooth'});if(view==='admin')renderAdmin()}
+function newsCard(n){return '<article class="card"><div class="cover">'+(n.cover_image_url?'<img src="'+esc(n.cover_image_url)+'" alt="">':'✦')+'</div><div class="card-body"><span class="tag '+(n.category==='event'?'yellow':n.category==='community'?'pink':'')+'">'+esc(({official:'官方公告',event:'活動消息',maintenance:'維護資訊',community:'社群整理'})[n.category]||'最新消息')+'</span><h3>'+esc(n.title)+'</h3><p>'+esc(n.excerpt||n.content||'')+'</p><div class="meta"><span>'+esc(n.source_name||'Brawl Stars Hub')+'</span><span>'+date(n.published_at)+'</span></div></div></article>'}
+function updateCard(u){return '<article class="card"><div class="cover">⚙</div><div class="card-body"><span class="tag yellow">'+esc(u.version||'版本更新')+'</span><h3>'+esc(u.title)+'</h3><p>'+esc(u.summary||u.content||'')+'</p><div class="meta"><span>更新紀錄</span><span>'+date(u.released_at)+'</span></div></div></article>'}
+function brawlerCard(b){return '<article class="card brawler"><div class="cover">'+(b.image_url?'<img src="'+esc(b.image_url)+'" alt="'+esc(b.name)+'">':'★')+'</div><div class="card-body"><span class="tag">'+esc(b.rarity||'角色')+'</span><h3>'+esc(b.name)+'</h3><p>'+esc(b.description||b.class||'角色資料整理中')+'</p><div class="meta"><span>'+esc(b.class||'荒野亂鬥角色')+'</span></div></div></article>'}
+function render(){
+  $('newsCount').textContent=news.length;$('updateCount').textContent=updates.length;$('brawlerCount').textContent=brawlers.length;
+  const featured=news.find(n=>n.is_featured)||news[0];
+  $('homeFeatured').innerHTML=featured?'<article class="card"><div class="card-body"><span class="tag yellow">焦點消息</span><h3>'+esc(featured.title)+'</h3><p>'+esc(featured.excerpt||featured.content||'')+'</p><div class="meta"><span>'+esc(featured.source_name||'官方消息')+'</span><span>'+date(featured.published_at)+'</span></div></div></article><div class="card"><div class="cover" style="height:100%;min-height:220px">'+(featured.cover_image_url?'<img src="'+esc(featured.cover_image_url)+'" alt="">':'✦')+'</div></div>':empty('情報站準備中');
+  $('homeNews').innerHTML=news.length?news.slice(0,3).map(newsCard).join(''):empty('最新消息即將上線');
+  filterNews();filterUpdates();filterBrawlers();
+}
+function filterNews(){const q=($('newsSearch')?.value||'').trim().toLowerCase();const list=news.filter(n=>(activeCategory==='all'||n.category===activeCategory)&&(!q||(n.title+' '+(n.excerpt||'')).toLowerCase().includes(q)));$('newsGrid').innerHTML=list.length?list.map(newsCard).join(''):empty('找不到符合的消息')}
+function filterUpdates(){const q=($('updateSearch')?.value||'').trim().toLowerCase();const list=updates.filter(u=>!q||((u.title+' '+(u.version||'')).toLowerCase().includes(q)));$('updatesGrid').innerHTML=list.length?list.map(updateCard).join(''):empty('版本更新資料準備中')}
+function filterBrawlers(){const q=($('brawlerSearch')?.value||'').trim().toLowerCase();const list=brawlers.filter(b=>!q||b.name.toLowerCase().includes(q));$('brawlersGrid').innerHTML=list.length?list.map(brawlerCard).join(''):empty('角色資料準備中')}
+async function loadData(){
+  const results=await Promise.all([
+    db.from('news_posts').select('*').eq('is_published',true).order('published_at',{ascending:false}),
+    db.from('game_updates').select('*').eq('is_published',true).order('released_at',{ascending:false}),
+    db.from('brawlers').select('*').eq('is_active',true).order('sort_order').order('name')
+  ]);
+  if(results[0].error||results[1].error||results[2].error){console.error(results.map(x=>x.error));toast('資料載入遇到問題，請稍後重試');}
+  news=results[0].data||[];updates=results[1].data||[];brawlers=results[2].data||[];render();
+}
+function loginMarkup(){return '<div class="admin-shell login"><h2>管理員登入</h2><p style="color:var(--muted);line-height:1.7;font-size:13px">此入口僅供網站管理者使用。一般訪客不需要登入即可瀏覽網站。</p><form id="loginForm" class="form-grid"><div class="field full"><label>管理員電子郵件</label><input name="email" type="email" autocomplete="username" required></div><div class="field full"><label>密碼</label><input name="password" type="password" autocomplete="current-password" required></div><div class="field full"><button class="btn" type="submit">登入管理後台</button></div></form><div class="notice">目前只開放登入，不提供公開註冊。管理員帳號需先由網站擁有者設定。</div></div>'}
+function adminMarkup(){return '<div class="admin-shell"><div class="admin-head"><div><h2>內容管理後台</h2><p style="margin:5px 0 0;color:var(--muted);font-size:12px">'+esc(adminUser.email||'管理員')+'</p></div><button class="btn ghost small" id="logoutBtn">登出</button></div><div class="admin-tabs"><button data-admin-tab="news" class="'+(adminTab==='news'?'active':'')+'">新增消息</button><button data-admin-tab="updates" class="'+(adminTab==='updates'?'active':'')+'">新增版本</button><button data-admin-tab="brawlers" class="'+(adminTab==='brawlers'?'active':'')+'">新增角色</button></div><div id="adminFormArea">'+adminFormMarkup()+'</div><div class="admin-list" id="adminList">'+adminListMarkup()+'</div></div>'}
+function adminFormMarkup(){
+ if(adminTab==='news')return '<form id="contentForm" class="form-grid"><input type="hidden" name="id"><div class="field full"><label>消息標題</label><input name="title" required maxlength="160"></div><div class="field"><label>網址代稱（slug）</label><input name="slug" required placeholder="例如：season-update"></div><div class="field"><label>分類</label><select name="category"><option value="official">官方公告</option><option value="event">活動消息</option><option value="maintenance">維護資訊</option><option value="community">社群整理</option></select></div><div class="field full"><label>摘要</label><textarea name="excerpt" placeholder="簡短說明消息重點"></textarea></div><div class="field full"><label>完整內容</label><textarea name="content" placeholder="可輸入整理後的消息內容"></textarea></div><div class="field"><label>來源名稱</label><input name="source_name" placeholder="例如：Brawl Stars 官方"></div><div class="field"><label>來源網址</label><input name="source_url" type="url" placeholder="https://..."></div><div class="field full"><label>封面圖片網址（選填）</label><input name="cover_image_url" type="url" placeholder="https://..."></div><div class="field full"><label class="checkrow"><input type="checkbox" name="is_published"> 立即發布（取消則儲存為草稿）</label><label class="checkrow"><input type="checkbox" name="is_featured"> 設為首頁焦點</label></div><div class="field full"><button class="btn" type="submit">儲存消息</button></div></form>';
+ if(adminTab==='updates')return '<form id="contentForm" class="form-grid"><input type="hidden" name="id"><div class="field"><label>版本編號</label><input name="version" placeholder="例如：最新版本"></div><div class="field"><label>更新日期</label><input name="released_at" type="date"></div><div class="field full"><label>標題</label><input name="title" required></div><div class="field full"><label>摘要</label><textarea name="summary"></textarea></div><div class="field full"><label>完整更新內容</label><textarea name="content"></textarea></div><div class="field full"><label>官方來源網址</label><input name="source_url" type="url"></div><div class="field full"><label class="checkrow"><input type="checkbox" name="is_published"> 立即發布</label></div><div class="field full"><button class="btn" type="submit">儲存版本紀錄</button></div></form>';
+ return '<form id="contentForm" class="form-grid"><input type="hidden" name="id"><div class="field"><label>角色名稱</label><input name="name" required></div><div class="field"><label>網址代稱（slug）</label><input name="slug" required></div><div class="field"><label>稀有度</label><input name="rarity" placeholder="例如：神話"></div><div class="field"><label>角色職業</label><input name="class" placeholder="例如：輸出"></div><div class="field full"><label>角色介紹</label><textarea name="description"></textarea></div><div class="field full"><label>角色圖片網址（選填）</label><input name="image_url" type="url"></div><div class="field"><label>排序數字</label><input name="sort_order" type="number" value="0"></div><div class="field"><label class="checkrow"><input type="checkbox" name="is_active" checked> 顯示在圖鑑</label></div><div class="field full"><button class="btn" type="submit">儲存角色</button></div></form>';
+}
+function adminListMarkup(){
+ const items=adminTab==='news'?news:adminTab==='updates'?updates:brawlers;
+ return items.length?items.map(x=>'<div class="admin-row"><div><b>'+esc(x.title||x.name)+'</b><small>'+esc(x.is_published===false?'草稿':x.is_active===false?'已隱藏':'已發布')+'</small></div><div class="actions"><button class="btn danger small" data-delete="'+adminTab+'" data-id="'+x.id+'">刪除</button></div></div>').join(''):empty('目前沒有資料');
+}
+async function renderAdmin(){
+ const root=$('adminRoot');
+ if(!adminUser){root.innerHTML=loginMarkup();return}
+ const check=await db.from('admin_users').select('user_id').eq('user_id',adminUser.id).maybeSingle();
+ isAdmin=!!check.data&&!check.error;
+ if(!isAdmin){root.innerHTML='<div class="admin-shell login"><h2>尚未取得管理員權限</h2><div class="notice warn">這個帳號已登入，但尚未加入網站管理員名單。請先完成擁有者授權。</div><p style="font-size:12px;color:var(--muted)">帳號識別碼：<br><code>'+esc(adminUser.id)+'</code></p><button class="btn ghost" id="logoutBtn">登出</button></div>';return}
+ root.innerHTML=adminMarkup();
+}
+async function handleLogin(e){e.preventDefault();const f=new FormData(e.currentTarget);const r=await db.auth.signInWithPassword({email:f.get('email'),password:f.get('password')});if(r.error){toast('登入失敗：請檢查帳號與密碼');return}adminUser=r.data.user;await renderAdmin()}
+async function handleSave(e){
+ e.preventDefault();if(!isAdmin){toast('沒有管理權限');return}
+ const f=new FormData(e.currentTarget),id=f.get('id')||null;let table,payload;
+ if(adminTab==='news'){table='news_posts';payload={title:f.get('title').trim(),slug:f.get('slug').trim(),category:f.get('category'),excerpt:f.get('excerpt'),content:f.get('content'),source_name:f.get('source_name'),source_url:f.get('source_url'),cover_image_url:f.get('cover_image_url'),is_published:f.has('is_published'),is_featured:f.has('is_featured'),published_at:f.has('is_published')?new Date().toISOString():null}}
+ else if(adminTab==='updates'){table='game_updates';payload={version:f.get('version'),title:f.get('title').trim(),summary:f.get('summary'),content:f.get('content'),source_url:f.get('source_url'),released_at:f.get('released_at')?new Date(f.get('released_at')+'T12:00:00').toISOString():null,is_published:f.has('is_published')}}
+ else{table='brawlers';payload={name:f.get('name').trim(),slug:f.get('slug').trim(),rarity:f.get('rarity'),class:f.get('class'),description:f.get('description'),image_url:f.get('image_url'),sort_order:Number(f.get('sort_order')||0),is_active:f.has('is_active')}}
+ const result=id?await db.from(table).update(payload).eq('id',id):await db.from(table).insert(payload);
+ if(result.error){toast('儲存失敗：'+result.error.message);return}
+ toast('已儲存');await loadData();renderAdmin();
+}
+async function deleteItem(type,id){if(!isAdmin||!confirm('確定刪除這筆資料？'))return;const table=type==='news'?'news_posts':type==='updates'?'game_updates':'brawlers';const r=await db.from(table).delete().eq('id',id);if(r.error){toast('刪除失敗：'+r.error.message);return}toast('已刪除');await loadData();renderAdmin()}
+document.addEventListener('click',async e=>{
+ const view=e.target.closest('[data-view]');if(view){go(view.dataset.view);return}
+ const goBtn=e.target.closest('[data-go]');if(goBtn){go(goBtn.dataset.go);return}
+ const cat=e.target.closest('[data-category]');if(cat){activeCategory=cat.dataset.category;document.querySelectorAll('#newsFilters button').forEach(b=>b.classList.toggle('active',b===cat));filterNews();return}
+ const tab=e.target.closest('[data-admin-tab]');if(tab){adminTab=tab.dataset.adminTab;renderAdmin();return}
+ const del=e.target.closest('[data-delete]');if(del){deleteItem(del.dataset.delete,del.dataset.id);return}
+ if(e.target.id==='adminOpen'){go('admin');return}
+ if(e.target.id==='logoutBtn'){await db.auth.signOut();adminUser=null;isAdmin=false;renderAdmin();return}
+});
+document.addEventListener('submit',e=>{if(e.target.id==='loginForm')handleLogin(e);if(e.target.id==='contentForm')handleSave(e)});
+$('newsSearch').addEventListener('input',filterNews);$('updateSearch').addEventListener('input',filterUpdates);$('brawlerSearch').addEventListener('input',filterBrawlers);
+db.auth.getSession().then(({data})=>{adminUser=data.session?.user||null});
+loadData();
+})();
+</script>
+</body>
+</html>
