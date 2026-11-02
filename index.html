@@ -128,7 +128,12 @@ function adminListMarkup(){
 }
 async function renderAdmin(){
  const root=$('adminRoot');
- if(!adminUser){root.innerHTML=loginMarkup();return}
+ if(!adminUser){
+  root.innerHTML=loginMarkup();
+  const loginForm=root.querySelector('#loginForm');
+  if(loginForm)loginForm.addEventListener('submit',handleLogin);
+  return;
+ }
  const check=await db.from('admin_users').select('user_id').eq('user_id',adminUser.id).maybeSingle();
  isAdmin=!!check.data&&!check.error;
  if(!isAdmin){root.innerHTML='<div class="admin-shell login"><h2>尚未取得管理員權限</h2><div class="notice warn">這個帳號已登入，但尚未加入網站管理員名單。請先完成擁有者授權。</div><p style="font-size:12px;color:var(--muted)">帳號識別碼：<br><code>'+esc(adminUser.id)+'</code></p><button class="btn ghost" id="logoutBtn">登出</button></div>';return}
@@ -142,7 +147,30 @@ async function renderAdmin(){
  if(!allBrawlers.error)brawlers=allBrawlers.data||[];
  root.innerHTML=adminMarkup();
 }
-async function handleLogin(e){e.preventDefault();const f=new FormData(e.currentTarget);const r=await db.auth.signInWithPassword({email:f.get('email'),password:f.get('password')});if(r.error){toast('登入失敗：請檢查帳號與密碼');return}adminUser=r.data.user;await renderAdmin()}
+async function handleLogin(e){
+ e.preventDefault();
+ const form=e.currentTarget;
+ const button=form.querySelector('button[type="submit"]');
+ const originalText=button?.textContent||'登入管理後台';
+ if(button){button.disabled=true;button.textContent='登入中…'}
+ toast('正在連線並驗證帳號…');
+ try{
+  const f=new FormData(form);
+  const email=String(f.get('email')||'').trim();
+  const password=String(f.get('password')||'');
+  if(!email||!password){toast('請先輸入 Email 和密碼');return}
+  const r=await db.auth.signInWithPassword({email,password});
+  if(r.error){console.error('Supabase login error:',r.error);toast('登入失敗：'+r.error.message);return}
+  adminUser=r.data.user;
+  await renderAdmin();
+  toast('登入成功，正在載入管理後台');
+ }catch(err){
+  console.error('Login exception:',err);
+  toast('登入發生錯誤：'+(err?.message||'請檢查網路後重試'));
+ }finally{
+  if(button){button.disabled=false;button.textContent=originalText}
+ }
+}
 async function handleSave(e){
  e.preventDefault();if(!isAdmin){toast('沒有管理權限');return}
  const f=new FormData(e.currentTarget),id=f.get('id')||null;let table,payload;
@@ -178,7 +206,7 @@ document.addEventListener('click',async e=>{
  if(e.target.id==='adminOpen'){go('admin');return}
  if(e.target.id==='logoutBtn'){await db.auth.signOut();adminUser=null;isAdmin=false;renderAdmin();return}
 });
-document.addEventListener('submit',e=>{if(e.target.id==='loginForm')handleLogin(e);if(e.target.id==='contentForm')handleSave(e)});
+document.addEventListener('submit',e=>{if(e.target.id==='contentForm')handleSave(e)});
 $('newsSearch').addEventListener('input',filterNews);$('updateSearch').addEventListener('input',filterUpdates);$('brawlerSearch').addEventListener('input',filterBrawlers);
 db.auth.getSession().then(({data})=>{adminUser=data.session?.user||null});
 loadData();
