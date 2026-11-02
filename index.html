@@ -124,7 +124,7 @@ function adminFormMarkup(){
 }
 function adminListMarkup(){
  const items=adminTab==='news'?news:adminTab==='updates'?updates:brawlers;
- return items.length?items.map(x=>'<div class="admin-row"><div><b>'+esc(x.title||x.name)+'</b><small>'+esc(x.is_published===false?'草稿':x.is_active===false?'已隱藏':'已發布')+'</small></div><div class="actions"><button class="btn danger small" data-delete="'+adminTab+'" data-id="'+x.id+'">刪除</button></div></div>').join(''):empty('目前沒有資料');
+ return items.length?items.map(x=>'<div class="admin-row"><div><b>'+esc(x.title||x.name)+'</b><small>'+esc(x.is_published===false?'草稿':x.is_active===false?'已隱藏':'已發布')+'</small></div><div class="actions"><button class="btn secondary small" data-edit="'+adminTab+'" data-id="'+x.id+'">編輯</button> <button class="btn danger small" data-delete="'+adminTab+'" data-id="'+x.id+'">刪除</button></div></div>').join(''):empty('目前沒有資料');
 }
 async function renderAdmin(){
  const root=$('adminRoot');
@@ -132,6 +132,14 @@ async function renderAdmin(){
  const check=await db.from('admin_users').select('user_id').eq('user_id',adminUser.id).maybeSingle();
  isAdmin=!!check.data&&!check.error;
  if(!isAdmin){root.innerHTML='<div class="admin-shell login"><h2>尚未取得管理員權限</h2><div class="notice warn">這個帳號已登入，但尚未加入網站管理員名單。請先完成擁有者授權。</div><p style="font-size:12px;color:var(--muted)">帳號識別碼：<br><code>'+esc(adminUser.id)+'</code></p><button class="btn ghost" id="logoutBtn">登出</button></div>';return}
+ const [allNews,allUpdates,allBrawlers]=await Promise.all([
+  db.from('news_posts').select('*').order('created_at',{ascending:false}),
+  db.from('game_updates').select('*').order('created_at',{ascending:false}),
+  db.from('brawlers').select('*').order('sort_order').order('name')
+ ]);
+ if(!allNews.error)news=allNews.data||[];
+ if(!allUpdates.error)updates=allUpdates.data||[];
+ if(!allBrawlers.error)brawlers=allBrawlers.data||[];
  root.innerHTML=adminMarkup();
 }
 async function handleLogin(e){e.preventDefault();const f=new FormData(e.currentTarget);const r=await db.auth.signInWithPassword({email:f.get('email'),password:f.get('password')});if(r.error){toast('登入失敗：請檢查帳號與密碼');return}adminUser=r.data.user;await renderAdmin()}
@@ -145,12 +153,27 @@ async function handleSave(e){
  if(result.error){toast('儲存失敗：'+result.error.message);return}
  toast('已儲存');await loadData();renderAdmin();
 }
+function editItem(type,id){
+ const items=type==='news'?news:type==='updates'?updates:brawlers;
+ const item=items.find(x=>x.id===id);if(!item)return;
+ adminTab=type;renderAdmin().then(()=>{
+  const form=$('contentForm');if(!form)return;
+  Object.keys(item).forEach(k=>{
+   const field=form.elements[k];if(!field)return;
+   if(field.type==='checkbox')field.checked=!!item[k];
+   else if(field.type==='date')field.value=item[k]?new Date(item[k]).toISOString().slice(0,10):'';
+   else field.value=item[k]==null?'':item[k];
+  });
+  form.scrollIntoView({behavior:'smooth',block:'center'});
+ });
+}
 async function deleteItem(type,id){if(!isAdmin||!confirm('確定刪除這筆資料？'))return;const table=type==='news'?'news_posts':type==='updates'?'game_updates':'brawlers';const r=await db.from(table).delete().eq('id',id);if(r.error){toast('刪除失敗：'+r.error.message);return}toast('已刪除');await loadData();renderAdmin()}
 document.addEventListener('click',async e=>{
  const view=e.target.closest('[data-view]');if(view){go(view.dataset.view);return}
  const goBtn=e.target.closest('[data-go]');if(goBtn){go(goBtn.dataset.go);return}
  const cat=e.target.closest('[data-category]');if(cat){activeCategory=cat.dataset.category;document.querySelectorAll('#newsFilters button').forEach(b=>b.classList.toggle('active',b===cat));filterNews();return}
  const tab=e.target.closest('[data-admin-tab]');if(tab){adminTab=tab.dataset.adminTab;renderAdmin();return}
+ const edit=e.target.closest('[data-edit]');if(edit){editItem(edit.dataset.edit,edit.dataset.id);return}
  const del=e.target.closest('[data-delete]');if(del){deleteItem(del.dataset.delete,del.dataset.id);return}
  if(e.target.id==='adminOpen'){go('admin');return}
  if(e.target.id==='logoutBtn'){await db.auth.signOut();adminUser=null;isAdmin=false;renderAdmin();return}
