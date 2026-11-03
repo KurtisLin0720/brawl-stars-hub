@@ -146,6 +146,8 @@ async function renderAdmin(){
  if(!allUpdates.error)updates=allUpdates.data||[];
  if(!allBrawlers.error)brawlers=allBrawlers.data||[];
  root.innerHTML=adminMarkup();
+ const contentForm=root.querySelector('#contentForm');
+ if(contentForm)contentForm.addEventListener('submit',handleSave);
 }
 async function handleLogin(e){
  e.preventDefault();
@@ -172,7 +174,7 @@ async function handleLogin(e){
  }
 }
 async function handleSave(e){
- e.preventDefault();if(!isAdmin){toast('沒有管理權限');return}
+ e.preventDefault();if(!isAdmin){toast('管理權限尚未確認，請重新登入後再試');return}
  const form=e.target;
  const f=new FormData(form),id=f.get('id')||null;let table,payload;
  if(adminTab==='news'){table='news_posts';payload={title:f.get('title').trim(),slug:f.get('slug').trim(),category:f.get('category'),excerpt:f.get('excerpt'),content:f.get('content'),source_name:f.get('source_name'),source_url:f.get('source_url'),cover_image_url:f.get('cover_image_url'),is_published:f.has('is_published'),is_featured:f.has('is_featured'),published_at:f.has('is_published')?new Date().toISOString():null}}
@@ -232,7 +234,6 @@ document.addEventListener('click',async e=>{
  if(e.target.id==='adminOpen'){go('admin');return}
  if(e.target.id==='logoutBtn'){await db.auth.signOut();adminUser=null;isAdmin=false;renderAdmin();return}
 });
-document.addEventListener('submit',e=>{if(e.target.id==='contentForm')handleSave(e)});
 $('newsSearch').addEventListener('input',filterNews);$('updateSearch').addEventListener('input',filterUpdates);$('brawlerSearch').addEventListener('input',filterBrawlers);
 db.auth.getSession().then(({data})=>{adminUser=data.session?.user||null});
 loadData();
