@@ -7,6 +7,7 @@
 <meta name="description" content="Brawl Stars Hub｜荒野亂鬥官方消息、版本更新與角色資料整理。">
 <title>Brawl Stars Hub｜荒野亂鬥情報站</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 :root{color-scheme:dark;--bg:#0d1020;--panel:#171b30;--panel2:#202641;--line:#303956;--text:#f4f6ff;--muted:#aab3ce;--yellow:#ffd65a;--pink:#ff6e9c;--blue:#78c8ff;--green:#7ce3b0;--radius:20px;font-family:Inter,system-ui,-apple-system,"Noto Sans TC",sans-serif}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 15% -10%,#28335d 0,transparent 38%),radial-gradient(ellipse at 100% 10%,#382447 0,transparent 32%),var(--bg);color:var(--text);min-height:100vh}
@@ -86,7 +87,7 @@ footer{border-top:1px solid #ffffff12;padding:24px 0 38px;color:#7985a5;font-siz
 'use strict';
 const SUPABASE_URL='https://iyduszeaqyhivmnzbhwb.supabase.co';
 const SUPABASE_KEY='sb_publishable_Nc18atcX3PB6x_vEos-4rw_UuR8hVVI';
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const db=window.supabase?.createClient ? window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY) : null;
 let news=[],updates=[],brawlers=[],activeCategory='all',adminUser=null,isAdmin=false,adminTab='news';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -133,6 +134,7 @@ async function enrichBrawlerData(rows){
  }catch(error){console.warn('角色圖片與職業資料暫時無法載入',error);return rows}
 }
 async function loadData(){
+  if(!db){news=[];updates=[];brawlers=[];render();toast('資料服務暫時無法連線，但網站導覽仍可使用');console.error('Supabase SDK 未載入');return;}
   const results=await Promise.all([
     db.from('news_posts').select('*').eq('is_published',true).order('published_at',{ascending:false}),
     db.from('game_updates').select('*').eq('is_published',true).order('released_at',{ascending:false}),
@@ -154,6 +156,7 @@ function adminListMarkup(){
 }
 async function renderAdmin(){
  const root=$('adminRoot');
+ if(!db){root.innerHTML='<div class="admin-shell"><h2>管理服務暫時無法連線</h2><p>請稍後重新整理頁面。</p></div>';return;}
  if(!adminUser){
   root.innerHTML=loginMarkup();
   const loginForm=root.querySelector('#loginForm');
@@ -263,7 +266,7 @@ document.addEventListener('click',async e=>{
 });
 $('newsSearch').addEventListener('input',filterNews);$('updateSearch').addEventListener('input',filterUpdates);$('brawlerSearch').addEventListener('input',filterBrawlers);
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-brawler-id]')){e.preventDefault();openBrawler(e.target.dataset.brawlerId)}if(e.key==='Escape'){closeBrawler();closeNews()}});
-db.auth.getSession().then(({data})=>{adminUser=data.session?.user||null});
+if(db)db.auth.getSession().then(({data})=>{adminUser=data.session?.user||null}).catch(err=>console.error('Auth session error:',err));
 loadData();
 })();
 </script>
