@@ -177,9 +177,35 @@ async function handleSave(e){
  if(adminTab==='news'){table='news_posts';payload={title:f.get('title').trim(),slug:f.get('slug').trim(),category:f.get('category'),excerpt:f.get('excerpt'),content:f.get('content'),source_name:f.get('source_name'),source_url:f.get('source_url'),cover_image_url:f.get('cover_image_url'),is_published:f.has('is_published'),is_featured:f.has('is_featured'),published_at:f.has('is_published')?new Date().toISOString():null}}
  else if(adminTab==='updates'){table='game_updates';payload={version:f.get('version'),title:f.get('title').trim(),summary:f.get('summary'),content:f.get('content'),source_url:f.get('source_url'),released_at:f.get('released_at')?new Date(f.get('released_at')+'T12:00:00').toISOString():null,is_published:f.has('is_published')}}
  else{table='brawlers';payload={name:f.get('name').trim(),slug:f.get('slug').trim(),rarity:f.get('rarity'),class:f.get('class'),description:f.get('description'),image_url:f.get('image_url'),sort_order:Number(f.get('sort_order')||0),is_active:f.has('is_active')}}
- const result=id?await db.from(table).update(payload).eq('id',id):await db.from(table).insert(payload);
- if(result.error){toast('儲存失敗：'+result.error.message);return}
- toast('已儲存');await loadData();renderAdmin();
+ const form=e.currentTarget;
+ const submitButton=form.querySelector('button[type="submit"]');
+ const originalLabel=submitButton?.textContent||'儲存';
+ if(submitButton){submitButton.disabled=true;submitButton.textContent='儲存中…'}
+ try{
+  const result=id?await db.from(table).update(payload).eq('id',id):await db.from(table).insert(payload);
+  if(result.error){toast('儲存失敗：'+result.error.message);return}
+  await loadData();
+  await renderAdmin();
+  const shell=$('adminRoot').querySelector('.admin-shell');
+  if(shell){
+   const notice=document.createElement('div');
+   notice.className='notice';
+   notice.setAttribute('role','status');
+   notice.style.background='#183b32';
+   notice.style.borderColor='#34785f';
+   notice.style.color='#baf5d8';
+   notice.innerHTML='<strong>✓ 儲存成功</strong><br>'+(id?'內容已更新，':'新內容已新增，')+'資料已成功寫入資料庫。你可以在下方管理列表確認。';
+   const tabs=shell.querySelector('.admin-tabs');
+   shell.insertBefore(notice,tabs||shell.firstChild);
+  }
+  toast('已成功儲存到資料庫');
+ }catch(err){
+  console.error('Save error:',err);
+  toast('儲存時發生錯誤：'+(err?.message||'請稍後重試'));
+ }finally{
+  if(submitButton&&!submitButton.isConnected){/* 表單已重新渲染 */}
+  else if(submitButton){submitButton.disabled=false;submitButton.textContent=originalLabel}
+ }
 }
 function editItem(type,id){
  const items=type==='news'?news:type==='updates'?updates:brawlers;
