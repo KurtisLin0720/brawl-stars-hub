@@ -173,11 +173,11 @@ async function handleLogin(e){
 }
 async function handleSave(e){
  e.preventDefault();if(!isAdmin){toast('沒有管理權限');return}
- const f=new FormData(e.currentTarget),id=f.get('id')||null;let table,payload;
+ const form=e.target;
+ const f=new FormData(form),id=f.get('id')||null;let table,payload;
  if(adminTab==='news'){table='news_posts';payload={title:f.get('title').trim(),slug:f.get('slug').trim(),category:f.get('category'),excerpt:f.get('excerpt'),content:f.get('content'),source_name:f.get('source_name'),source_url:f.get('source_url'),cover_image_url:f.get('cover_image_url'),is_published:f.has('is_published'),is_featured:f.has('is_featured'),published_at:f.has('is_published')?new Date().toISOString():null}}
  else if(adminTab==='updates'){table='game_updates';payload={version:f.get('version'),title:f.get('title').trim(),summary:f.get('summary'),content:f.get('content'),source_url:f.get('source_url'),released_at:f.get('released_at')?new Date(f.get('released_at')+'T12:00:00').toISOString():null,is_published:f.has('is_published')}}
  else{table='brawlers';payload={name:f.get('name').trim(),slug:f.get('slug').trim(),rarity:f.get('rarity'),class:f.get('class'),description:f.get('description'),image_url:f.get('image_url'),sort_order:Number(f.get('sort_order')||0),is_active:f.has('is_active')}}
- const form=e.currentTarget;
  const submitButton=form.querySelector('button[type="submit"]');
  const originalLabel=submitButton?.textContent||'儲存';
  if(submitButton){submitButton.disabled=true;submitButton.textContent='儲存中…'}
