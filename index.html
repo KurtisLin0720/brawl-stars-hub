@@ -89,7 +89,7 @@ footer{border-top:1px solid #ffffff12;padding:24px 0 38px;color:#7985a5;font-siz
 const SUPABASE_URL='https://iyduszeaqyhivmnzbhwb.supabase.co';
 const SUPABASE_KEY='sb_publishable_Nc18atcX3PB6x_vEos-4rw_UuR8hVVI';
 const db=window.supabase?.createClient ? window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY) : null;
-let news=[],updates=[],brawlers=[],activeCategory='all',adminUser=null,isAdmin=false,adminTab='news';
+let news=[],updates=[],brawlers=[],brawlerDetails={},activeCategory='all',adminUser=null,isAdmin=false,adminTab='news';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=s=>s?new Date(s).toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}):'尚未標示日期';
@@ -113,11 +113,27 @@ function render(){
 function filterNews(){const q=($('newsSearch')?.value||'').trim().toLowerCase();const list=news.filter(n=>(activeCategory==='all'||n.category===activeCategory)&&(!q||(n.title+' '+(n.excerpt||'')).toLowerCase().includes(q)));$('newsGrid').innerHTML=list.length?list.map(newsCard).join(''):empty('找不到符合的消息')}
 function filterUpdates(){const q=($('updateSearch')?.value||'').trim().toLowerCase();const list=updates.filter(u=>!q||((u.title+' '+(u.version||'')).toLowerCase().includes(q)));$('updatesGrid').innerHTML=list.length?list.map(updateCard).join(''):empty('版本更新資料準備中')}
 function filterBrawlers(){const q=($('brawlerSearch')?.value||'').trim().toLowerCase();const rarity=$('brawlerRarityFilter')?.value||'all';const list=brawlers.filter(b=>(rarity==='all'||b.rarity===rarity)&&(!q||(b.name+' '+(b.api_name||'')+' '+(b.slug||'')).toLowerCase().includes(q)));$('brawlerResultCount').textContent='顯示 '+list.length+' / '+brawlers.length+' 位';$('brawlersGrid').innerHTML=list.length?list.map(brawlerCard).join(''):empty('找不到符合條件的角色')}
+function abilityCards(items){
+ if(!Array.isArray(items)||!items.length)return '<div class="detail-placeholder">繁體中文資料整理中，完成核對後會在這裡顯示。</div>';
+ return '<div class="detail-items">'+items.map(item=>'<article class="detail-item">'+(item.image_url?'<img src="'+esc(item.image_url)+'" alt="">':'')+'<div><strong>'+esc(item.name_zh||'名稱整理中')+'</strong><p>'+esc(item.desc_zh||'效果說明整理中。')+'</p></div></article>').join('')+'</div>';
+}
+function detailSection(title,name,desc){
+ return '<section class="brawler-detail-section"><h3>'+title+'</h3>'+(name||desc?'<div class="detail-placeholder"><strong>'+esc(name||'名稱整理中')+'</strong><p class="detail-note">'+esc(desc||'繁體中文效果說明整理中。')+'</p></div>':'<div class="detail-placeholder">繁體中文資料整理中，完成核對後會在這裡顯示。</div>')+'</section>';
+}
 function openBrawler(id){
  const b=brawlers.find(x=>String(x.id)===String(id));if(!b)return;
+ const d=brawlerDetails[b.id]||{};
  const image=b.image_url||b.image_fallback||'';
  const intro=b.description||'這位角色的繁體中文背景介紹正在整理中。';
- $('brawlerDetailBody').innerHTML='<div class="brawler-detail-head">'+(image?'<img src="'+esc(image)+'" data-fallback="'+esc(b.image_fallback||'')+'" alt="'+esc(b.name)+'角色圖片" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.dataset.fallback=\'\'}else{this.style.display=\'none\'}">':'<div class="detail-placeholder">角色圖片暫時無法載入</div>')+'<div><span class="tag">'+esc(rarityLabel(b.rarity))+'</span><h2>'+esc(b.name)+'</h2><p>角色定位：'+esc(b.class||'尚未分類')+'</p><p class="detail-note">'+esc(intro)+'</p></div></div><section class="brawler-detail-section"><h3>角色基本資料</h3><div class="detail-placeholder">稀有度：'+esc(rarityLabel(b.rarity))+'<br>角色定位：'+esc(b.class||'尚未分類')+'</div></section><section class="brawler-detail-section"><h3>遊戲模式資訊</h3><div class="detail-placeholder">各角色的模式適性會逐一整理；目前尚未完成核對，暫時不提供未確認的推薦。</div></section>';$('brawlerDetail').classList.add('open');document.body.style.overflow='hidden';
+ let html='<div class="brawler-detail-head">'+(image?'<img src="'+esc(image)+'" data-fallback="'+esc(b.image_fallback||'')+'" alt="'+esc(b.name)+'角色圖片" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.dataset.fallback=\'\'}else{this.style.display=\'none\'}">':'<div class="detail-placeholder">角色圖片暫時無法載入</div>')+'<div><span class="tag">'+esc(rarityLabel(b.rarity))+'</span><h2>'+esc(b.name)+'</h2><p>角色定位：'+esc(b.class||'尚未分類')+'</p><p class="detail-note">'+esc(intro)+'</p></div></div>';
+ html+=detailSection('普通攻擊',d.attack_name_zh,d.attack_desc_zh);
+ html+=detailSection('超級技能',d.super_name_zh,d.super_desc_zh);
+ html+='<section class="brawler-detail-section"><h3>能力之星</h3>'+abilityCards(d.star_powers)+'</section>';
+ html+='<section class="brawler-detail-section"><h3>角色配件</h3>'+abilityCards(d.gadgets)+'</section>';
+ html+=detailSection('極限威能',d.hypercharge_name_zh,d.hypercharge_desc_zh);
+ html+='<section class="brawler-detail-section"><h3>增益吊飾（Buffies）</h3>'+abilityCards(d.buffies)+'</section>';
+ html+='<section class="brawler-detail-section"><h3>資料來源</h3><div class="detail-placeholder">'+(d.source_url?'<a href="'+esc(d.source_url)+'" target="_blank" rel="noopener" style="color:#9bd6ff">查看資料來源</a>':'資料來源與核對日期將隨資料一併補上。')+'</div></section>';
+ $('brawlerDetailBody').innerHTML=html;$('brawlerDetail').classList.add('open');document.body.style.overflow='hidden';
 }
 function closeBrawler(){$('brawlerDetail').classList.remove('open');document.body.style.overflow=''}
 function normalizeBrawlerKey(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
@@ -141,10 +157,11 @@ async function loadData(){
   const results=await Promise.all([
     db.from('news_posts').select('*').eq('is_published',true).order('published_at',{ascending:false}),
     db.from('game_updates').select('*').eq('is_published',true).order('released_at',{ascending:false}),
-    db.from('brawlers').select('*').eq('is_active',true).order('sort_order').order('name')
+    db.from('brawlers').select('*').eq('is_active',true).order('sort_order').order('name'),
+    db.from('brawler_ability_details').select('*')
   ]);
   if(results[0].error||results[1].error||results[2].error){console.error(results.map(x=>x.error));toast('資料載入遇到問題，請稍後重試');}
-  news=results[0].data||[];updates=results[1].data||[];brawlers=await enrichBrawlerData(results[2].data||[]);render();
+  news=results[0].data||[];updates=results[1].data||[];brawlers=await enrichBrawlerData(results[2].data||[]);brawlerDetails=Object.fromEntries((results[3].data||[]).map(x=>[x.brawler_id,x]));render();
 }
 function loginMarkup(){return '<div class="admin-shell login"><h2>管理員登入</h2><p style="color:var(--muted);line-height:1.7;font-size:13px">此入口僅供網站管理者使用。一般訪客不需要登入即可瀏覽網站。</p><form id="loginForm" class="form-grid"><div class="field full"><label>管理員電子郵件</label><input name="email" type="email" autocomplete="username" required></div><div class="field full"><label>密碼</label><input name="password" type="password" autocomplete="current-password" required></div><div class="field full"><button class="btn" type="submit">登入管理後台</button></div></form><div class="notice">目前只開放登入，不提供公開註冊。管理員帳號需先由網站擁有者設定。</div></div>'}
 function adminMarkup(){return '<div class="admin-shell"><div class="admin-head"><div><h2>內容管理後台</h2><p style="margin:5px 0 0;color:var(--muted);font-size:12px">'+esc(adminUser.email||'管理員')+'</p></div><button class="btn ghost small" id="logoutBtn">登出</button></div><div class="admin-tabs"><button data-admin-tab="news" class="'+(adminTab==='news'?'active':'')+'">新增消息</button><button data-admin-tab="updates" class="'+(adminTab==='updates'?'active':'')+'">新增版本</button><button data-admin-tab="brawlers" class="'+(adminTab==='brawlers'?'active':'')+'">新增角色</button></div><div id="adminFormArea">'+adminFormMarkup()+'</div><div class="admin-list" id="adminList">'+adminListMarkup()+'</div></div>'}
