@@ -113,9 +113,9 @@ function render(){
 function filterNews(){const q=($('newsSearch')?.value||'').trim().toLowerCase();const list=news.filter(n=>(activeCategory==='all'||n.category===activeCategory)&&(!q||(n.title+' '+(n.excerpt||'')).toLowerCase().includes(q)));$('newsGrid').innerHTML=list.length?list.map(newsCard).join(''):empty('找不到符合的消息')}
 function filterUpdates(){const q=($('updateSearch')?.value||'').trim().toLowerCase();const list=updates.filter(u=>!q||((u.title+' '+(u.version||'')).toLowerCase().includes(q)));$('updatesGrid').innerHTML=list.length?list.map(updateCard).join(''):empty('版本更新資料準備中')}
 function filterBrawlers(){const q=($('brawlerSearch')?.value||'').trim().toLowerCase();const rarity=$('brawlerRarityFilter')?.value||'all';const list=brawlers.filter(b=>(rarity==='all'||b.rarity===rarity)&&(!q||(b.name+' '+(b.api_name||'')+' '+(b.slug||'')).toLowerCase().includes(q)));$('brawlerResultCount').textContent='顯示 '+list.length+' / '+brawlers.length+' 位';$('brawlersGrid').innerHTML=list.length?list.map(brawlerCard).join(''):empty('找不到符合條件的角色')}
-function abilityCards(items){
- if(!Array.isArray(items)||!items.length)return '<div class="detail-placeholder">繁體中文資料整理中，完成核對後會在這裡顯示。</div>';
- return '<div class="detail-items">'+items.map(item=>'<article class="detail-item">'+(item.image_url?'<img src="'+esc(item.image_url)+'" alt="">':'')+'<div><strong>'+esc(item.name_zh||'名稱整理中')+'</strong><p>'+esc(item.desc_zh||'效果說明整理中。')+'</p></div></article>').join('')+'</div>';
+function abilityCards(items,emptyText){
+ if(!Array.isArray(items)||!items.length)return '<div class="detail-placeholder">'+esc(emptyText||'繁體中文資料整理中，完成核對後會在這裡顯示。')+'</div>';
+ return '<div class="detail-items">'+items.map(item=>'<article class="detail-item">'+(item.image_url?'<img src="'+esc(item.image_url)+'" alt="">':'')+'<div>'+(item.category_zh?'<span class="tag">'+esc(item.category_zh)+'</span>':'')+'<strong>'+esc(item.name_zh||'名稱整理中')+'</strong><p>'+esc(item.desc_zh||'效果說明整理中。')+'</p></div></article>').join('')+'</div>';
 }
 function detailSection(title,name,desc){
  return '<section class="brawler-detail-section"><h3>'+title+'</h3>'+(name||desc?'<div class="detail-placeholder"><strong>'+esc(name||'名稱整理中')+'</strong><p class="detail-note">'+esc(desc||'繁體中文效果說明整理中。')+'</p></div>':'<div class="detail-placeholder">繁體中文資料整理中，完成核對後會在這裡顯示。</div>')+'</section>';
@@ -130,7 +130,7 @@ function openBrawler(id){
  html+=detailSection('超級技能',d.super_name_zh,d.super_desc_zh);
  html+='<section class="brawler-detail-section"><h3>能力之星</h3>'+abilityCards(d.star_powers)+'</section>';
  html+=detailSection('極限威能',d.hypercharge_name_zh,d.hypercharge_desc_zh);
- html+='<section class="brawler-detail-section"><h3>增益吊飾（Buffies）</h3>'+abilityCards(d.buffies)+'</section>';
+ html+='<section class="brawler-detail-section"><h3>增益吊飾（Buffies）</h3>'+abilityCards(d.buffies,'截至 2026 年 11 月 4 日，尚未查到這位角色已推出增益吊飾。')+'</section>';
  html+='<section class="brawler-detail-section"><h3>資料來源</h3><div class="detail-placeholder">'+(d.source_url?'<a href="'+esc(d.source_url)+'" target="_blank" rel="noopener" style="color:#9bd6ff">查看資料來源</a>':'資料來源與核對日期將隨資料一併補上。')+'</div></section>';
  $('brawlerDetailBody').innerHTML=html;$('brawlerDetail').classList.add('open');document.body.style.overflow='hidden';
 }
