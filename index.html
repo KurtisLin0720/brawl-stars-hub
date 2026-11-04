@@ -133,12 +133,31 @@ function abilityCards(items,emptyText){
 function detailSection(title,name,desc){
  return '<section class="brawler-detail-section"><h3>'+title+'</h3>'+(name||desc?'<div class="detail-placeholder"><strong>'+esc(name||'名稱整理中')+'</strong><p class="detail-note">'+esc(desc||'繁體中文效果說明整理中。')+'</p></div>':'<div class="detail-placeholder">繁體中文資料整理中，完成核對後會在這裡顯示。</div>')+'</section>';
 }
+
+function radarSection(stats){
+ if(!stats||!Object.keys(stats).length)return '<section class="brawler-detail-section"><h3>五維戰力分析</h3><div class="detail-placeholder">戰力評分整理中。</div></section>';
+ const fields=[['攻擊強度','attack'],['填彈速度','reload'],['移動速度','movement'],['血量','health'],['恢復速度','recovery']];
+ const vals=fields.map(f=>Math.max(0,Math.min(10,Number(stats[f[1]]||0))));
+ const cx=150,cy=125,R=82;
+ const point=(v,i,r=R)=>{const a=(-90+i*72)*Math.PI/180;return [cx+Math.cos(a)*r*v/10,cy+Math.sin(a)*r*v/10]};
+ const polygon=v=>fields.map((_,i)=>point(v,i)).map(p=>p.join(',')).join(' ');
+ const dataPoly=vals.map((v,i)=>point(v,i)).map(p=>p.join(',')).join(' ');
+ const rings=[2,4,6,8,10].map(v=>'<polygon points="'+polygon(v)+'" fill="none" stroke="#647093" stroke-opacity=".45"/>').join('');
+ const axes=fields.map((_,i)=>{const p=point(10,i);return '<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0]+'" y2="'+p[1]+'" stroke="#647093" stroke-opacity=".55"/>'}).join('');
+ const labels=fields.map((f,i)=>{const p=point(10,i,R+27);return '<text x="'+p[0]+'" y="'+p[1]+'" text-anchor="middle" dominant-baseline="middle">'+f[0]+'</text>'}).join('');
+ const dots=vals.map((v,i)=>{const p=point(v,i);return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="#ffe071"/>'}).join('');
+ const total=Math.round(vals.reduce((a,b)=>a+b,0)*2);
+ const cards=fields.map((f,i)=>'<div class="radar-value"><b>'+f[0]+'</b><span>'+vals[i]+' / 10</span></div>').join('');
+ return '<section class="brawler-detail-section"><h3>五維戰力分析</h3><div class="radar-panel"><svg class="radar-chart" viewBox="0 0 300 250" role="img" aria-label="五維戰力雷達圖">'+rings+axes+'<polygon points="'+dataPoly+'" fill="#ffcf5b" fill-opacity=".25" stroke="#ffd65a" stroke-width="2.5"/>'+dots+labels+'</svg><div class="radar-values">'+cards+'<div class="radar-total"><div><b>綜合戰力</b><div class="radar-caption">五項平均分數 × 10</div></div><strong>'+total+'<small style="font-size:13px;color:#d9d2ee"> / 100</small></strong></div></div></div><p class="radar-caption">試行評分：依角色基礎能力與技能恢復效果作相對比較；不是官方數值，也不代表實際勝率。填彈速度分數越高代表裝填越快。</p></section>';
+}
+
 function openBrawler(id){
  const b=brawlers.find(x=>String(x.id)===String(id));if(!b)return;
  const d=brawlerDetails[b.id]||{};
  const image=b.image_url||b.image_fallback||'';
  const intro=b.description||'這位角色的繁體中文背景介紹正在整理中。';
  let html='<div class="brawler-detail-head">'+(image?'<img src="'+esc(image)+'" data-fallback="'+esc(b.image_fallback||'')+'" alt="'+esc(b.name)+'角色圖片" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.dataset.fallback=\'\'}else{this.style.display=\'none\'}">':'<div class="detail-placeholder">角色圖片暫時無法載入</div>')+'<div><span class="tag">'+esc(rarityLabel(b.rarity))+'</span><h2>'+esc(b.name)+'</h2><p>角色定位：'+esc(b.class||'尚未分類')+'</p><p class="detail-note">'+esc(intro)+'</p></div></div>';
+ html+=radarSection(d.radar_stats);
  html+=detailSection('普通攻擊',d.attack_name_zh,d.attack_desc_zh);
  html+=detailSection('超級技能',d.super_name_zh,d.super_desc_zh);
  html+='<section class="brawler-detail-section"><h3>配件</h3>'+abilityCards(d.gadgets,'配件資料整理中，完成核對後會在這裡顯示。')+'</section>';
