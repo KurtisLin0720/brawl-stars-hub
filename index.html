@@ -163,7 +163,7 @@ function openBrawler(id){
  html+='<section class="brawler-detail-section"><h3>配件</h3>'+abilityCards(d.gadgets,'配件資料整理中，完成核對後會在這裡顯示。')+'</section>';
  html+='<section class="brawler-detail-section"><h3>能力之星</h3>'+abilityCards(d.star_powers)+'</section>';
  html+=detailSection('極限威能',d.hypercharge_name_zh,d.hypercharge_desc_zh);
- html+='<section class="brawler-detail-section"><h3>增益吊飾（Buffies）</h3>'+abilityCards(d.buffies,'截至 2026 年 11 月 4 日，尚未查到這位角色已推出增益吊飾。')+'</section>';
+ html+='<section class="brawler-detail-section"><h3>增益吊飾（Buffies）</h3>'+abilityCards(d.buffies,'目前尚無已核實的增益吊飾資料；這不代表遊戲中一定沒有推出，待確認後再補上。')+'</section>';
  html+='<section class="brawler-detail-section"><h3>資料來源</h3><div class="detail-placeholder">'+(d.gadget_source_url?'<p><a href="'+esc(d.gadget_source_url)+'" target="_blank" rel="noopener" style="color:#9bd6ff">查看配件資料來源</a></p>':'')+(d.source_url?'<a href="'+esc(d.source_url)+'" target="_blank" rel="noopener" style="color:#9bd6ff">查看角色資料來源</a>':'資料來源與核對日期將隨資料一併補上。')+'</div></section>';
  $('brawlerDetailBody').innerHTML=html;$('brawlerDetail').classList.add('open');document.body.style.overflow='hidden';
 }
