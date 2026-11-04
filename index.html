@@ -129,7 +129,6 @@ function openBrawler(id){
  html+=detailSection('普通攻擊',d.attack_name_zh,d.attack_desc_zh);
  html+=detailSection('超級技能',d.super_name_zh,d.super_desc_zh);
  html+='<section class="brawler-detail-section"><h3>能力之星</h3>'+abilityCards(d.star_powers)+'</section>';
- html+='<section class="brawler-detail-section"><h3>角色配件</h3>'+abilityCards(d.gadgets)+'</section>';
  html+=detailSection('極限威能',d.hypercharge_name_zh,d.hypercharge_desc_zh);
  html+='<section class="brawler-detail-section"><h3>增益吊飾（Buffies）</h3>'+abilityCards(d.buffies)+'</section>';
  html+='<section class="brawler-detail-section"><h3>資料來源</h3><div class="detail-placeholder">'+(d.source_url?'<a href="'+esc(d.source_url)+'" target="_blank" rel="noopener" style="color:#9bd6ff">查看資料來源</a>':'資料來源與核對日期將隨資料一併補上。')+'</div></section>';
